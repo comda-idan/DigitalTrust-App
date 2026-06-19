@@ -1,5 +1,5 @@
 /* Digital Trust App — service worker (cache app shell, offline-capable) */
-const CACHE = 'dt-cache-v1.0.0';
+const CACHE = 'dt-cache-v1.1.0';
 const ASSETS = [
   '.',
   'index.html',
@@ -9,9 +9,11 @@ const ASSETS = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/maskable-512.png',
+  'icons/apple-touch-icon.png',
   'js/i18n.js',
   'js/store.js',
   'js/utils.js',
+  'js/icons.js',
   'js/app.js',
   'js/auth.js',
   'js/home.js',
