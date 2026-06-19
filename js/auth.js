@@ -324,11 +324,17 @@
 
   function keypad(onDigit, onDel) {
     const pad = el('div', { class: 'keypad' });
+    function key(attrs, fn) {
+      const b = el('button', Object.assign({ type: 'button' }, attrs));
+      // pointerdown = instant response; no 300ms click delay, no missed fast taps
+      b.addEventListener('pointerdown', (e) => { e.preventDefault(); fn(); });
+      return b;
+    }
     ['1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(d =>
-      pad.appendChild(el('button', { text: d, onclick: () => onDigit(d) })));
+      pad.appendChild(key({ text: d }, () => onDigit(d))));
     pad.appendChild(el('span'));
-    pad.appendChild(el('button', { text: '0', onclick: () => onDigit('0') }));
-    pad.appendChild(el('button', { class: 'fn', html: iconHTML('backspace', 24), onclick: onDel }));
+    pad.appendChild(key({ text: '0' }, () => onDigit('0')));
+    pad.appendChild(key({ class: 'fn', html: iconHTML('backspace', 24) }, onDel));
     return pad;
   }
   window.PinKeypad = keypad;
@@ -344,7 +350,7 @@
     const supported = !!(window.PublicKeyCredential && navigator.credentials);
     if (!supported) main.appendChild(el('div', { class: 'banner warn', html: iconHTML('alert') + t('pk_unsupported') }));
 
-    main.appendChild(el('button', { class: 'btn primary', html: iconHTML('fingerprint', 19) + t('pk_create'), disabled: !supported, onclick: createPasskey }));
+    main.appendChild(el('button', { class: 'btn primary', html: iconHTML('fingerprint', 19) + t('pk_create'), onclick: createPasskey }));
     main.appendChild(el('button', { class: 'btn link', style: { display: 'block', margin: '14px auto 0' }, text: t('pk_skip'), onclick: () => go('regdone') }));
   };
 
@@ -397,10 +403,18 @@
   window.verifyPasskey = verifyPasskey;
 
   async function createPasskey() {
+    if (!(window.PublicKeyCredential && navigator.credentials)) {
+      // not a secure context (needs https or localhost) or browser lacks WebAuthn
+      toast(t('pk_unsupported'));
+      return;
+    }
     try {
       await registerPasskeyCredential(Reg.email || Store.get().user?.email);
       toast(t('pk_ok')); go('regdone');
-    } catch (e) { console.warn(e); toast(t('pk_fail')); }
+    } catch (e) {
+      // NotAllowedError = user cancelled / no biometric enrolled; either way, let them retry or skip
+      console.warn(e); toast(t('pk_fail'));
+    }
   }
   window.createPasskey = createPasskey;
 
