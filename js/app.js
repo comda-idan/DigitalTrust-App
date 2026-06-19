@@ -28,26 +28,29 @@ window.App = (function () {
   // ---- chrome ----
   function header(bare) {
     const s = Store.get();
-    const left = [
+    const brand = el('div', { class: 'brand-mark' }, [
       el('img', { class: 'logo', src: 'assets/logo.png', alt: 'COMDA' }),
-      el('span', { class: 'title', text: t('app_name') })
-    ];
+      el('div', { class: 'wordmark' }, [
+        el('b', { text: 'Digital Trust' }),
+        el('span', { text: 'by COMDA' })
+      ])
+    ]);
     const right = [langPill()];
     if (s.loggedIn) right.unshift(avatarBtn());
     return el('header', { class: 'app-hdr' }, [
-      ...left, el('div', { class: 'spacer' }), ...right
+      brand, el('div', { class: 'spacer' }), ...right
     ]);
   }
 
   function langPill() {
     return el('button', {
       class: 'lang-pill', onclick: openLangMenu,
-      html: '🌐 <span>' + I18N.get().toUpperCase() + '</span>'
+      html: U.iconHTML('globe', 15) + '<span>' + I18N.get().toUpperCase() + '</span>'
     });
   }
   function openLangMenu() {
     const box = el('div', {}, [
-      el('h3', { text: '🌐 ' + t('lang_he') + ' / ' + t('lang_en') + ' / ' + t('lang_ru'), style: { marginBottom: '14px' } }),
+      el('h3', { html: U.iconHTML('globe', 18) + ' ' + t('lang_he') + ' · ' + t('lang_en') + ' · ' + t('lang_ru'), style: { marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' } }),
       ...I18N.langs().map(([code, name]) =>
         el('button', {
           class: 'btn ' + (code === I18N.get() ? 'primary' : 'subtle'),
@@ -66,18 +69,19 @@ window.App = (function () {
   }
   function openProfileMenu() {
     const items = [
-      ['👤 ' + t('profile_title'), () => go('profile')],
-      ['ℹ️ ' + t('about_title'), () => go('about')],
-      ['⚙️ ' + t('settings'), () => go('admin')],
+      ['user', t('profile_title'), () => go('profile')],
+      ['info', t('about_title'), () => go('about')],
+      ['settings', t('settings'), () => go('admin')],
     ];
     const box = el('div', {}, [
-      el('h3', { text: t('profile'), style: { marginBottom: '12px' } }),
-      ...items.map(([label, fn]) => el('button', {
+      el('h3', { text: t('profile'), style: { marginBottom: '14px' } }),
+      ...items.map(([ic, label, fn]) => el('button', {
         class: 'btn subtle', style: { marginBottom: '10px', justifyContent: 'flex-start' },
-        text: label, onclick: () => { close(); fn(); }
+        html: U.iconHTML(ic, 19) + '<span style="margin-inline-start:4px">' + label + '</span>',
+        onclick: () => { close(); fn(); }
       })),
       el('button', {
-        class: 'btn ghost', style: { marginTop: '4px' }, text: '↩ ' + t('logout'),
+        class: 'btn link', style: { marginTop: '4px' }, html: U.iconHTML('logout', 18) + ' ' + t('logout'),
         onclick: () => { close(); Store.update(st => { st.loggedIn = false; }); go('login'); }
       })
     ]);
@@ -86,26 +90,26 @@ window.App = (function () {
 
   function tabbar(route) {
     const tabs = [
-      ['home', '🏠', t('tab_home')],
-      ['signed', '✅', t('tab_signed')],
-      ['sent', '📨', t('tab_sent')],
+      ['home', 'home', t('tab_home')],
+      ['signed', 'signature', t('tab_signed')],
+      ['sent', 'send', t('tab_sent')],
     ];
     return el('nav', { class: 'tabbar' }, tabs.map(([r, ic, label]) =>
       el('button', {
         class: route === r ? 'active' : '', onclick: () => go(r),
-        html: '<span class="ic">' + ic + '</span><span>' + label + '</span>'
+        html: '<span class="tb-ic">' + U.iconHTML(ic, 23) + '</span><span>' + label + '</span>'
       })
     ));
   }
 
   // back button helper for sub screens
   function backBar(toRoute, title) {
-    return el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', margin: '-4px 0 12px' } }, [
+    return el('div', { class: 'backbar' }, [
       el('button', {
-        class: 'icon-btn', html: I18N.dir() === 'rtl' ? '→' : '←',
+        class: 'icon-btn', html: U.iconHTML(I18N.dir() === 'rtl' ? 'arrow-right' : 'arrow-left', 20),
         onclick: () => toRoute ? go(toRoute) : history.back()
       }),
-      el('h1', { text: title, style: { fontSize: '20px', margin: 0 } })
+      el('h1', { text: title })
     ]);
   }
 

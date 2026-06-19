@@ -1,5 +1,5 @@
 /* ===== Store: state, config, persistence ===== */
-window.APP_VERSION = '1.0.0';
+window.APP_VERSION = '1.1.0';
 
 window.Store = (function () {
   const KEY = 'dt_state_v1';

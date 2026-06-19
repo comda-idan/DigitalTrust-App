@@ -1,18 +1,18 @@
 /* ===== Hidden admin / system settings ===== */
 (function () {
-  const { el, $, toast, downloadText, confirmDialog } = U;
+  const { el, $, toast, downloadText, confirmDialog, iconHTML, fileIcon } = U;
   const t = (k) => I18N.t(k);
   const go = (r, p) => App.go(r, p);
 
   const EP = [
-    ['pdf', 'method_pdf', '📕'],
-    ['word', 'method_word', '📘'],
-    ['excel', 'method_excel', '📗'],
+    ['pdf', 'method_pdf', 'pdf'],
+    ['word', 'method_word', 'docx'],
+    ['excel', 'method_excel', 'xlsx'],
   ];
 
   Screens.admin = function (main) {
-    main.appendChild(App.backBar('home', '⚙️ ' + t('admin_title')));
-    main.appendChild(el('div', { class: 'banner warn', html: '🔒 ' + t('admin_warn') }));
+    main.appendChild(App.backBar('home', t('admin_title')));
+    main.appendChild(el('div', { class: 'banner warn', html: iconHTML('lock', 18) + t('admin_warn') }));
 
     const s = Store.get();
 
@@ -35,7 +35,7 @@
       const body = el('textarea', { class: 'inp mono', rows: 8, dir: 'ltr', spellcheck: 'false', text: ep.body || '' });
       epInputs[key] = { url, body };
       main.appendChild(card([
-        el('div', { class: 'ep-head' }, [el('span', { html: ic }), el('b', { text: t(label) })]),
+        el('div', { class: 'ep-head' }, [el('span', { class: 'ic' }, [fileIcon(ic, 26)]), el('b', { text: t(label) })]),
         el('label', { class: 'lbl', text: t('admin_url') }), url,
         el('label', { class: 'lbl', style: { marginTop: '10px' }, text: t('admin_body') }), body,
         el('p', { class: 'small muted', html: t('admin_body_hint') })
@@ -44,7 +44,7 @@
 
     // ---- Save ----
     main.appendChild(el('button', {
-      class: 'btn primary', html: '💾 ' + t('save'),
+      class: 'btn primary', html: iconHTML('save', 19) + t('save'),
       onclick: () => {
         Store.update(st => {
           st.settings.idUrl = idInput.value.trim();
@@ -64,7 +64,7 @@
     const contactsIn = el('input', { type: 'file', accept: '.xlsx,.xls,.csv', style: { display: 'none' } });
     contactsIn.addEventListener('change', () => importContacts(contactsIn.files[0]));
     main.appendChild(card([
-      el('button', { class: 'btn subtle', html: '📇 ' + t('admin_contacts_import'), onclick: () => contactsIn.click() }),
+      el('button', { class: 'btn subtle', html: iconHTML('contacts', 18) + t('admin_contacts_import'), onclick: () => contactsIn.click() }),
       contactsIn,
       el('p', { class: 'small muted', text: 'name · email · phone' })
     ]));
@@ -75,17 +75,17 @@
     importIn.addEventListener('change', () => importJson(importIn.files[0]));
     main.appendChild(card([
       el('button', {
-        class: 'btn subtle', style: { marginBottom: '10px' }, html: '⬇️ ' + t('admin_export'),
+        class: 'btn subtle', style: { marginBottom: '10px' }, html: iconHTML('download', 18) + t('admin_export'),
         onclick: () => downloadText(Store.exportSettings(), 'digital-trust-settings.json')
       }),
-      el('button', { class: 'btn subtle', html: '⬆️ ' + t('admin_import'), onclick: () => importIn.click() }),
+      el('button', { class: 'btn subtle', html: iconHTML('upload', 18) + t('admin_import'), onclick: () => importIn.click() }),
       importIn
     ]));
 
     // ---- Danger zone: clear all data ----
     main.appendChild(el('div', { class: 'danger-zone' }, [
       el('button', {
-        class: 'btn danger', html: '🗑️ ' + t('admin_clear'),
+        class: 'btn danger', html: iconHTML('trash', 19) + t('admin_clear'),
         onclick: () => confirmDialog(t('admin_clear_q'), () => {
           Store.clearAll();
           toast(t('admin_cleared'));
