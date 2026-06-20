@@ -122,8 +122,14 @@
       .replace(/\{\{PINCODE\}\}/g, pin || '')
       .replace(/\{\{FILENAME\}\}/g, picked.file.name);
 
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-    const text = await res.text();
+    let res, text;
+    try {
+      res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      text = await res.text();
+    } catch (e) {
+      // request never completed (CORS / SSL / unreachable) — no response body to show
+      return { ok: false, networkError: String((e && e.message) || e), url };
+    }
 
     let data = null; try { data = JSON.parse(text); } catch (e) { /* non-JSON */ }
     // .NET / WCF (.svc) endpoints commonly wrap the payload in a { "d": ... } envelope
@@ -147,7 +153,9 @@
     rows.push(el('div', { class: 'auth-head accent' }, [el('div', { class: 'glyph', html: iconHTML('x-circle', 30) }), el('h3', { text: t('su_failed') })]));
 
     if (result.networkError) {
-      rows.push(el('div', { class: 'banner err', html: iconHTML('alert') + String(result.networkError) }));
+      rows.push(detailBlock(t('su_code'), el('span', { class: 'mono', style: { color: 'var(--accent)', fontWeight: '700' }, text: result.networkError })));
+      rows.push(el('div', { class: 'banner warn', style: { textAlign: 'start' }, html: iconHTML('info', 18) + t('su_net_hint') }));
+      if (result.url) rows.push(detailBlock(t('su_attempted_url'), el('span', { class: 'mono', style: { fontSize: '11.5px', wordBreak: 'break-all' }, text: result.url })));
     } else {
       const codeStr = result.code == null ? '—' : String(result.code);
       const numeric = /^\d+$/.test(codeStr) ? Number(codeStr) : null;
