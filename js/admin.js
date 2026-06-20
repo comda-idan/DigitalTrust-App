@@ -29,16 +29,37 @@
     // ---- Signing endpoints (one card per method) ----
     main.appendChild(el('h3', { class: 'sec-title', text: t('admin_endpoints') }));
     const epInputs = {};
+    const DEFAULTS = Store.defaults().endpoints || {};
     EP.forEach(([key, label, ic]) => {
       const ep = s.settings.endpoints[key] || { url: '', body: '' };
       const url = el('input', { class: 'inp', type: 'url', dir: 'ltr', placeholder: 'https://…/api/Sign/…', value: ep.url || '' });
       const body = el('textarea', { class: 'inp mono', rows: 8, dir: 'ltr', spellcheck: 'false', text: ep.body || '' });
       epInputs[key] = { url, body };
+
+      const validity = el('span', { class: 'pill', style: { fontSize: '10.5px' } });
+      function checkJson() {
+        const raw = (body.value || '').replace(/\{\{[A-Z_]+\}\}/g, '0'); // placeholders are valid stand-ins
+        let ok = true; try { JSON.parse(raw); } catch (e) { ok = false; }
+        validity.className = 'pill ' + (ok ? 'signed' : 'pending');
+        validity.innerHTML = iconHTML(ok ? 'check' : 'alert', 12) + (ok ? t('json_ok') : t('json_bad'));
+      }
+      body.addEventListener('input', checkJson);
+      checkJson();
+
+      const restore = el('button', {
+        class: 'btn subtle sm', style: { marginTop: '8px' }, html: iconHTML('refresh', 16) + t('admin_restore'),
+        onclick: () => { body.value = (DEFAULTS[key] && DEFAULTS[key].body) || ''; checkJson(); }
+      });
+
       main.appendChild(card([
         el('div', { class: 'ep-head' }, [el('span', { class: 'ic' }, [fileIcon(ic, 26)]), el('b', { text: t(label) })]),
         el('label', { class: 'lbl', text: t('admin_url') }), url,
-        el('label', { class: 'lbl', style: { marginTop: '10px' }, text: t('admin_body') }), body,
-        el('p', { class: 'small muted', html: t('admin_body_hint') })
+        el('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' } }, [
+          el('label', { class: 'lbl', style: { margin: 0 }, text: t('admin_body') }), validity
+        ]),
+        body,
+        restore,
+        el('p', { class: 'small muted', style: { marginTop: '8px' }, html: t('admin_body_hint') })
       ]));
     });
 

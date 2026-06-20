@@ -46,7 +46,8 @@
     file2: '<path d="M7 3.5h7l4.5 4.5v12.5H7V3.5Z"/><path d="M13.8 3.6V8.4h4.6"/>',
     'pen-field': '<path d="M4 18.5 14 8.5l3 3-10 10H4v-3Z"/><path d="m15.5 7 1.6-1.6a1.5 1.5 0 0 1 2.1 0l.9.9a1.5 1.5 0 0 1 0 2.1L18.5 10"/>',
     grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
-    'arrow-up-right': '<path d="M7 17 17 7M9 7h8v8"/>'
+    'arrow-up-right': '<path d="M7 17 17 7M9 7h8v8"/>',
+    share: '<circle cx="6" cy="12" r="2.5"/><circle cx="17.5" cy="6" r="2.5"/><circle cx="17.5" cy="18" r="2.5"/><path d="M8.2 10.9 15.3 7.1M8.2 13.1 15.3 16.9"/>'
   };
 
   function icon(name, size) {

@@ -154,9 +154,34 @@ window.U = (function () {
     return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).toUpperCase() || s[0].toUpperCase();
   }
 
+  function base64ToFile(b64, filename, mime) {
+    const bytes = atob(b64); const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new File([arr], filename, { type: mime || 'application/octet-stream' });
+  }
+  // Open the OS share sheet with the file attached (lets the user pick Mail/Gmail/etc).
+  // Returns 'shared' | 'unsupported' | 'cancelled'. Falls back to download on unsupported.
+  async function shareFile(b64, filename, mime, opts) {
+    opts = opts || {};
+    try {
+      const file = base64ToFile(b64, filename, mime);
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        await navigator.share({ files: [file], title: opts.title || filename, text: opts.text || '' });
+        return 'shared';
+      }
+      // no file-share support -> download so they can attach manually
+      downloadBase64(b64, filename, mime);
+      return 'unsupported';
+    } catch (e) {
+      if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError')) return 'cancelled';
+      try { downloadBase64(b64, filename, mime); } catch (_) {}
+      return 'unsupported';
+    }
+  }
+
   return {
     el, $, $$, toast, sheet, confirmDialog, fileToBase64, fileToArrayBuffer, fileToBlobUrl: null,
-    detectType, downloadBase64, downloadBlob, downloadText, MIME, validEmail, pinError,
+    detectType, downloadBase64, downloadBlob, downloadText, base64ToFile, shareFile, MIME, validEmail, pinError,
     genOtp, uid, fmtDate, initials, t
   };
 })();
